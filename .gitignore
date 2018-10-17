@@ -1,3 +1,4 @@
 assignment1/utils/datasets/glove.6B.50d.txt
 **/*.pyc
 assignment1/utils/datasets/*
+assignment1/.vscode
