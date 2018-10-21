@@ -1,4 +1,3 @@
-
 import numpy as np
 
 DEFAULT_FILE_PATH = "utils/datasets/glove.6B.50d.txt"
@@ -17,6 +16,7 @@ def loadWordVectors(tokens, filepath=DEFAULT_FILE_PATH, dimensions=50):
                 continue
             data = [float(x) for x in row[1:]]
             if len(data) != dimensions:
+                print 'len(data):', len(data)
                 raise RuntimeError("wrong number of dimensions")
             wordVectors[tokens[token]] = np.asarray(data)
     return wordVectors

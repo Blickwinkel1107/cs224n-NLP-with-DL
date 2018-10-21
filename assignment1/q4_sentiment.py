@@ -68,7 +68,8 @@ def getRegularizationValues():
     """
     values = None   # Assign a list of floats in the block below
     ### YOUR CODE HERE
-    raise NotImplementedError
+    values = list(np.arange(0, 100, 0.1))
+    #raise NotImplementedError
     ### END YOUR CODE
     return sorted(values)
 
@@ -92,7 +93,8 @@ def chooseBestModel(results):
     bestResult = None
 
     ### YOUR CODE HERE
-    raise NotImplementedError
+    bestResult = max(results, key=lambda x: (x['dev'], x['train']))
+    #raise NotImplementedError
     ### END YOUR CODE
 
     return bestResult
