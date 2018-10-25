@@ -45,6 +45,11 @@ class SoftmaxModel(Model):
             self.labels_placeholder
         """
         ### YOUR CODE HERE
+        config = self.config
+        self.input_placeholder = tf.placeholder(dtype=tf.float32, 
+                                                shape=[config.batch_size, config.n_features])
+        self.labels_placeholder = tf.placeholder(dtype=tf.int32,
+                                                shape=[config.batch_size, config.n_classes])
         ### END YOUR CODE
 
     def create_feed_dict(self, inputs_batch, labels_batch=None):
@@ -68,6 +73,10 @@ class SoftmaxModel(Model):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### YOUR CODE HERE
+        feed_dict = {
+            self.input_placeholder: inputs_batch,
+            self.labels_placeholder: labels_batch,
+        }
         ### END YOUR CODE
         return feed_dict
 
@@ -88,6 +97,14 @@ class SoftmaxModel(Model):
             pred: A tensor of shape (batch_size, n_classes)
         """
         ### YOUR CODE HERE
+        x = self.input_placeholder
+        y = self.labels_placeholder
+        N = x.shape[0]
+        m = x.shape[1]
+        n = y.shape[1]
+        W = tf.Variable(tf.zeros([m, n]), name="weights")
+        b = tf.Variable(tf.zeros([N, n]), name="biases")
+        pred = softmax(tf.matmul(x, W) + b)
         ### END YOUR CODE
         return pred
 
@@ -102,6 +119,9 @@ class SoftmaxModel(Model):
             loss: A 0-d tensor (scalar)
         """
         ### YOUR CODE HERE
+        y = self.labels_placeholder
+        yhat = pred
+        loss = cross_entropy_loss(y, yhat)
         ### END YOUR CODE
         return loss
 
@@ -125,6 +145,9 @@ class SoftmaxModel(Model):
             train_op: The Op for training.
         """
         ### YOUR CODE HERE
+        lr = self.config.lr
+        opt = tf.train.GradientDescentOptimizer(learning_rate=lr)
+        train_op = opt.minimize(loss)
         ### END YOUR CODE
         return train_op
 
