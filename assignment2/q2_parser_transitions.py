@@ -1,3 +1,5 @@
+import copy
+
 class PartialParse(object):
     def __init__(self, sentence):
         """Initializes this partial parse.
@@ -21,6 +23,9 @@ class PartialParse(object):
         self.sentence = sentence
 
         ### YOUR CODE HERE
+        self.stack = ["ROOT"]
+        self.buffer = copy.deepcopy(sentence)
+        self.dependencies = []
         ### END YOUR CODE
 
     def parse_step(self, transition):
@@ -31,6 +36,18 @@ class PartialParse(object):
                         and right-arc transitions.
         """
         ### YOUR CODE HERE
+        if transition == "S":
+            self.stack.append(self.buffer.pop(0))
+        if transition == "LA":
+            head = self.stack[-1]
+            dependent = self.stack[-2]
+            self.dependencies.append((head, dependent))
+            self.stack.pop(-2)
+        if transition == "RA":
+            head = self.stack[-2]
+            dependent = self.stack[-1]
+            self.dependencies.append((head, dependent))
+            self.stack.pop(-1)
         ### END YOUR CODE
 
     def parse(self, transitions):
@@ -65,6 +82,23 @@ def minibatch_parse(sentences, model, batch_size):
     """
 
     ### YOUR CODE HERE
+    #print sentences
+    partial_parses = [PartialParse(s) for s in sentences]
+    unfinished_parse = partial_parses
+
+    while len(unfinished_parse) > 0:
+        minibatch = unfinished_parse[0:batch_size]
+        # perform transition and single step parser on the minibatch until it is empty
+        while len(minibatch) > 0:
+            transitions = model.predict(minibatch)
+            for index, action in enumerate(transitions):
+                minibatch[index].parse_step(action)
+            minibatch = [parse for parse in minibatch if len(parse.stack) > 1 or len(parse.buffer) > 0]
+        # move to the next batch
+        unfinished_parse = unfinished_parse[batch_size:]
+    dependencies = []
+    for n in range(len(sentences)):
+        dependencies.append(partial_parses[n].dependencies)
     ### END YOUR CODE
 
     return dependencies

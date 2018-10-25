@@ -101,6 +101,7 @@ class Model(object):
             predictions: np.ndarray of shape (n_samples, n_classes)
         """
         feed = self.create_feed_dict(inputs_batch)
+        #print "inputs_batch.shape:", inputs_batch.shape
         predictions = sess.run(self.pred, feed_dict=feed)
         return predictions
 

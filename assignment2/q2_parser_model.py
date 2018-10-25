@@ -54,6 +54,15 @@ class ParserModel(Model):
         (Don't change the variable names)
         """
         ### YOUR CODE HERE
+        self.input_placeholder = tf.placeholder(tf.int32,
+                                                shape=(None, self.config.n_features),
+                                                name="input_placeholder")
+        self.labels_placeholder = tf.placeholder(tf.float32,
+                                                 shape=(None, self.config.n_classes),
+                                                 name="labels_placeholder")
+        self.dropout_placeholder = tf.placeholder(tf.float32,
+                                                  shape=(),
+                                                  name="dropout_placeholder")
         ### END YOUR CODE
 
     def create_feed_dict(self, inputs_batch, labels_batch=None, dropout=1):
@@ -79,6 +88,15 @@ class ParserModel(Model):
             feed_dict: The feed dictionary mapping from placeholders to values.
         """
         ### YOUR CODE HERE
+        feed_dict = {
+            self.input_placeholder : inputs_batch,
+            self.dropout_placeholder : dropout
+        }
+        if labels_batch is not None:
+            feed_dict.update({
+                self.labels_placeholder : labels_batch,
+            })
+        #print "dropout:", dropout
         ### END YOUR CODE
         return feed_dict
 
@@ -100,6 +118,10 @@ class ParserModel(Model):
             embeddings: tf.Tensor of shape (None, n_features*embed_size)
         """
         ### YOUR CODE HERE
+        embeddings = tf.nn.embedding_lookup(self.pretrained_embeddings, self.input_placeholder)
+        #print embeddings.shape
+        embeddings = tf.reshape(embeddings, shape=[-1, embeddings.shape[1] * embeddings.shape[2]])
+        #print "embedshape:", embeddings.shape
         ### END YOUR CODE
         return embeddings
 
@@ -130,6 +152,26 @@ class ParserModel(Model):
 
         x = self.add_embedding()
         ### YOUR CODE HERE
+        #print "\nx.shape[1]:", x.shape[1]
+        embed_size = self.pretrained_embeddings.shape[1]
+        hidden_size = self.config.hidden_size
+        p_drop = self.dropout_placeholder
+        n_classes = self.config.n_classes
+        n_features = self.config.n_features
+        xavier_initializer = xavier_weight_init()
+
+        W = tf.Variable(xavier_initializer([n_features * embed_size, hidden_size]))
+        b1 = tf.Variable(tf.zeros([hidden_size]))
+
+        h = tf.nn.relu_layer(x, W, b1)
+        #print "h.shape:", h.shape
+        h_drop = tf.nn.dropout(h, keep_prob=p_drop)
+
+        U = tf.Variable(xavier_initializer([hidden_size, n_classes]))
+        b2 = tf.Variable(tf.zeros([n_classes]))
+
+        pred = tf.matmul(h_drop * h, U) + b2
+
         ### END YOUR CODE
         return pred
 
@@ -147,6 +189,10 @@ class ParserModel(Model):
             loss: A 0-d tensor (scalar)
         """
         ### YOUR CODE HERE
+        labels = self.labels_placeholder
+        total_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels,
+                                                                logits=pred)
+        loss = tf.reduce_mean(total_loss)
         ### END YOUR CODE
         return loss
 
@@ -170,6 +216,9 @@ class ParserModel(Model):
             train_op: The Op for training.
         """
         ### YOUR CODE HERE
+        lr = self.config.lr
+        opt = tf.train.AdamOptimizer(learning_rate=lr)
+        train_op = opt.minimize(loss)
         ### END YOUR CODE
         return train_op
 
@@ -208,7 +257,7 @@ class ParserModel(Model):
         self.build()
 
 
-def main(debug=True):
+def main(debug=False):
     print 80 * "="
     print "INITIALIZING"
     print 80 * "="

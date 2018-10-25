@@ -1,4 +1,4 @@
-import numpy as np
+import math
 import tensorflow as tf
 
 
@@ -25,6 +25,13 @@ def xavier_weight_init():
             out: tf.Tensor of specified shape sampled from the Xavier distribution.
         """
         ### YOUR CODE HERE
+        m = shape[0]
+        if len(shape) > 1:
+            n = shape[1]
+        else:
+            n = m
+        epsilon = math.sqrt(6 / (m + n))
+        out = tf.random_uniform(shape, minval=-epsilon, maxval=epsilon)
         ### END YOUR CODE
         return out
     # Returns defined initializer function.

@@ -246,7 +246,11 @@ class Parser(object):
         UAS = all_tokens = 0.0
         for i, ex in enumerate(dataset):
             head = [-1] * len(ex['word'])
+            #print "ex['word']:", ex['word']
+            #print "len(head):", len(head)
+            #print "dependencies[i]:", dependencies[i]
             for h, t, in dependencies[i]:
+                #print "t:", t
                 head[t] = h
             for pred_h, gold_h, gold_l, pos in \
                     zip(head[1:], ex['head'][1:], ex['label'][1:], ex['pos'][1:]):
