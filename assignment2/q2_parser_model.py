@@ -118,7 +118,8 @@ class ParserModel(Model):
             embeddings: tf.Tensor of shape (None, n_features*embed_size)
         """
         ### YOUR CODE HERE
-        embeddings = tf.nn.embedding_lookup(self.pretrained_embeddings, self.input_placeholder)
+        embedded = tf.Variable(self.pretrained_embeddings)
+        embeddings = tf.nn.embedding_lookup(embedded,self.input_placeholder)
         #print embeddings.shape
         embeddings = tf.reshape(embeddings, shape=[-1, embeddings.shape[1] * embeddings.shape[2]])
         #print "embedshape:", embeddings.shape
@@ -160,17 +161,18 @@ class ParserModel(Model):
         n_features = self.config.n_features
         xavier_initializer = xavier_weight_init()
 
-        W = tf.Variable(xavier_initializer([n_features * embed_size, hidden_size]))
-        b1 = tf.Variable(tf.random_uniform([hidden_size]))
+	with tf.variable_scope("transformation"):
+	    W = tf.Variable(xavier_initializer([n_features * embed_size, hidden_size]))
+	    b1 = tf.Variable(tf.random_uniform([hidden_size]))
 
-        h = tf.nn.relu_layer(x, W, b1)
-        #print "h.shape:", h.shape
-        h_drop = tf.nn.dropout(h, keep_prob=p_drop)
+	    h = tf.nn.relu_layer(x, W, b1)
+	    #print "h.shape:", h.shape
+	    h_drop = tf.nn.dropout(h, keep_prob=p_drop)
 
-        U = tf.Variable(xavier_initializer([hidden_size, n_classes]))
-        b2 = tf.Variable(tf.random_uniform([n_classes]))
+	    U = tf.Variable(xavier_initializer([hidden_size, n_classes]))
+	    b2 = tf.Variable(tf.random_uniform([n_classes]))
 
-        pred = tf.matmul(h_drop * h, U) + b2
+	    pred = tf.matmul(h_drop * h, U) + b2
 
         ### END YOUR CODE
         return pred
