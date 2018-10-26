@@ -161,14 +161,14 @@ class ParserModel(Model):
         xavier_initializer = xavier_weight_init()
 
         W = tf.Variable(xavier_initializer([n_features * embed_size, hidden_size]))
-        b1 = tf.Variable(tf.zeros([hidden_size]))
+        b1 = tf.Variable(tf.random_uniform([hidden_size]))
 
         h = tf.nn.relu_layer(x, W, b1)
         #print "h.shape:", h.shape
         h_drop = tf.nn.dropout(h, keep_prob=p_drop)
 
         U = tf.Variable(xavier_initializer([hidden_size, n_classes]))
-        b2 = tf.Variable(tf.zeros([n_classes]))
+        b2 = tf.Variable(tf.random_uniform([n_classes]))
 
         pred = tf.matmul(h_drop * h, U) + b2
 
