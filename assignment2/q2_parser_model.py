@@ -18,9 +18,10 @@ class Config(object):
     """
     n_features = 36
     n_classes = 3
-    dropout = 0.5
+    dropout = 0.6
     embed_size = 50
-    hidden_size = 200
+    hidden1_size = 200
+    hidden2_size = 150
     batch_size = 2048
     n_epochs = 10
     lr = 0.001
@@ -63,9 +64,11 @@ class ParserModel(Model):
         self.dropout_placeholder = tf.placeholder(tf.float32,
                                                   shape=(),
                                                   name="dropout_placeholder")
+        self.beta_regul = tf.placeholder(tf.float32,
+                                         name="beta_regul")
         ### END YOUR CODE
 
-    def create_feed_dict(self, inputs_batch, labels_batch=None, dropout=1):
+    def create_feed_dict(self, inputs_batch, labels_batch=None, dropout=1, beta_regul=10e-7):
         """Creates the feed_dict for the dependency parser.
 
         A feed_dict takes the form of:
@@ -90,7 +93,8 @@ class ParserModel(Model):
         ### YOUR CODE HERE
         feed_dict = {
             self.input_placeholder : inputs_batch,
-            self.dropout_placeholder : dropout
+            self.dropout_placeholder : dropout,
+            self.beta_regul: beta_regul,
         }
         if labels_batch is not None:
             feed_dict.update({
@@ -155,24 +159,33 @@ class ParserModel(Model):
         ### YOUR CODE HERE
         #print "\nx.shape[1]:", x.shape[1]
         embed_size = self.pretrained_embeddings.shape[1]
-        hidden_size = self.config.hidden_size
+        hidden1_size = self.config.hidden1_size
+        hidden2_size = self.config.hidden2_size
         p_drop = self.dropout_placeholder
         n_classes = self.config.n_classes
         n_features = self.config.n_features
         xavier_initializer = xavier_weight_init()
 
-	with tf.variable_scope("transformation"):
-	    W = tf.Variable(xavier_initializer([n_features * embed_size, hidden_size]))
-	    b1 = tf.Variable(tf.random_uniform([hidden_size]))
+        with tf.variable_scope("transformation"):
+            self.W1 = W1 = tf.Variable(xavier_initializer([n_features * embed_size, hidden1_size]))
+            b1 = tf.Variable(tf.random_uniform([hidden1_size]))
 
-	    h = tf.nn.relu_layer(x, W, b1)
-	    #print "h.shape:", h.shape
-	    h_drop = tf.nn.dropout(h, keep_prob=p_drop)
+            z1 = tf.matmul(x, W1) + b1
+            h1 = tf.nn.relu(z1)
+            h_drop1 = tf.nn.dropout(h1, keep_prob=p_drop)
 
-	    U = tf.Variable(xavier_initializer([hidden_size, n_classes]))
-	    b2 = tf.Variable(tf.random_uniform([n_classes]))
+            self.W2 = W2 = tf.Variable(xavier_initializer([hidden1_size, hidden2_size]))
+            b2 = tf.Variable(tf.random_uniform([hidden2_size]))
 
-	    pred = tf.matmul(h_drop * h, U) + b2
+            z2 = tf.matmul(h_drop1, W2) + b2
+            h2 = tf.nn.relu(z2)
+            h_drop2 = tf.nn.dropout(h2, keep_prob=p_drop)
+
+            U = tf.Variable(xavier_initializer([hidden2_size, n_classes]))
+            b3 = tf.Variable(tf.random_uniform([n_classes]))
+
+            z3 = tf.matmul(h_drop2 , U) + b3
+            pred = z3
 
         ### END YOUR CODE
         return pred
@@ -194,6 +207,7 @@ class ParserModel(Model):
         labels = self.labels_placeholder
         total_loss = tf.nn.softmax_cross_entropy_with_logits_v2(labels=labels,
                                                                 logits=pred)
+        total_loss += self.beta_regul * (tf.nn.l2_loss(self.W1) + tf.nn.l2_loss(self.W2))
         loss = tf.reduce_mean(total_loss)
         ### END YOUR CODE
         return loss
