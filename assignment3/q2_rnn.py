@@ -100,10 +100,17 @@ def pad_sequences(data, max_length):
     # Use this zero vector when padding sequences.
     zero_vector = [0] * Config.n_features
     zero_label = 4 # corresponds to the 'O' tag
-
     for sentence, labels in data:
         ### YOUR CODE HERE (~4-6 lines)
-        pass
+        mask = [True] * sentence.__len__()
+        if sentence.__len__() < max_length:
+            for i in xrange(max_length - sentence.__len__()):
+                sentence.append(zero_vector)
+                labels.append(zero_label)
+                mask.append(False)
+        elif sentence.__len__() > max_length:
+            sentence, labels, mask = sentence[:max_length], labels[:max_length], mask[:max_length]
+        ret.append((sentence, labels, mask))
         ### END YOUR CODE ###
     return ret
 
