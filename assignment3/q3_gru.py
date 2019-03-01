@@ -87,6 +87,8 @@ class SequencePredictor(Model):
 
         x = self.inputs_placeholder
         ### YOUR CODE HERE (~2-3 lines)
+        outputs, state = tf.nn.dynamic_rnn(cell, x, dtype=tf.float32)
+        preds = tf.nn.sigmoid(state)
         ### END YOUR CODE
 
         return preds #state # preds
@@ -108,7 +110,7 @@ class SequencePredictor(Model):
         y = self.labels_placeholder
 
         ### YOUR CODE HERE (~1-2 lines)
-
+        loss = tf.reduce_mean(tf.nn.l2_loss(preds - y))
         ### END YOUR CODE
 
         return loss
@@ -144,6 +146,17 @@ class SequencePredictor(Model):
         # is True.
         # - Remember to set self.grad_norm
 
+        grad_and_var = optimizer.compute_gradients(loss)
+        grad = [x[0] for x in grad_and_var]
+        var = [x[1] for x in grad_and_var]
+        if self.config.clip_gradients is True:
+            print('clip')
+            clipped_grad = tf.clip_by_global_norm(grad, self.config.max_grad_norm)[0]
+            self.grad_norm = tf.global_norm(clipped_grad)
+            train_op = optimizer.apply_gradients(zip(clipped_grad, var))
+        else:
+            self.grad_norm = tf.global_norm(grad)
+            train_op = optimizer.apply_gradients(zip(grad, var))
         ### END YOUR CODE
 
         assert self.grad_norm is not None, "grad_norm was not set properly!"
