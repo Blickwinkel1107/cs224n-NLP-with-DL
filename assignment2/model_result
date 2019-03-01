@@ -1,0 +1,70 @@
+================================================================================
+INITIALIZING
+================================================================================
+Loading data... took 1.54 seconds
+Building parser... took 1.01 seconds
+Loading pretrained embeddings... took 1.92 seconds
+Vectorizing data... took 1.32 seconds
+Preprocessing training data...
+39832/39832 [==============================] - 34s     
+Building model... took 0.26 seconds
+
+2018-10-26 12:54:31.387951: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+================================================================================
+TRAINING
+================================================================================
+Epoch 1 out of 10
+924/924 [==============================] - 83s - train loss: 0.2091       
+Evaluating on dev set - dev UAS: 85.11
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 2 out of 10
+924/924 [==============================] - 83s - train loss: 0.1049     ^[[D
+Evaluating on dev set - dev UAS: 87.02
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 3 out of 10
+924/924 [==============================] - 83s - train loss: 0.0918       
+Evaluating on dev set - dev UAS: 87.82
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 4 out of 10
+924/924 [==============================] - 83s - train loss: 0.0836       
+Evaluating on dev set - dev UAS: 88.12
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 5 out of 10
+924/924 [==============================] - 83s - train loss: 0.0777       
+Evaluating on dev set - dev UAS: 88.64
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 6 out of 10
+924/924 [==============================] - 83s - train loss: 0.0732       
+Evaluating on dev set - dev UAS: 88.68
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 7 out of 10
+924/924 [==============================] - 82s - train loss: 0.0691       
+Evaluating on dev set - dev UAS: 88.57
+
+Epoch 8 out of 10
+924/924 [==============================] - 82s - train loss: 0.0657       
+Evaluating on dev set - dev UAS: 89.01
+New best dev UAS! Saving model in ./data/weights/parser.weights
+
+Epoch 9 out of 10
+924/924 [==============================] - 82s - train loss: 0.0621       
+Evaluating on dev set - dev UAS: 88.66
+
+Epoch 10 out of 10
+924/924 [==============================] - 82s - train loss: 0.0595       
+Evaluating on dev set - dev UAS: 88.53
+
+================================================================================
+TESTING
+================================================================================
+Restoring the best model weights found on the dev set
+Final evaluation on test set - test UAS: 88.90
+Writing predictions
+Done!
+
